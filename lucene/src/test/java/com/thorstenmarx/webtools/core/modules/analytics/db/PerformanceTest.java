@@ -26,10 +26,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.thorstenmarx.webtools.api.analytics.Fields;
 import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
 import com.thorstenmarx.webtools.api.analytics.query.Query;
-import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
-import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
-import com.thorstenmarx.webtools.core.modules.analytics.db.TestHelper;
-import net.engio.mbassy.bus.MBassador;
 import org.awaitility.Awaitility;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -60,7 +56,7 @@ public class PerformanceTest {
 	public void setup() {
 		Configuration config = new Configuration("target/performance-" + System.currentTimeMillis());
 
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}

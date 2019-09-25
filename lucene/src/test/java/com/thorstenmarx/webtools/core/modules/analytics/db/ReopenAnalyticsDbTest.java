@@ -46,7 +46,7 @@ public class ReopenAnalyticsDbTest {
 		config = new Configuration("target/ReopenAnalyticsDbTest-" + System.currentTimeMillis());
 
 		executor = new MockedExecutor();
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}
@@ -61,7 +61,7 @@ public class ReopenAnalyticsDbTest {
 		executor.shutdown();
 		
 		executor = new MockedExecutor();
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}

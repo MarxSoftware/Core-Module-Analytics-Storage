@@ -22,7 +22,6 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
  * #L%
  */
 import java.util.concurrent.atomic.AtomicInteger;
-import net.engio.mbassy.bus.MBassador;
 import org.apache.lucene.store.AlreadyClosedException;
 import org.testng.annotations.Test;
 
@@ -42,7 +41,7 @@ public class AlreadyClosedExceptionIssueTest {
 		Configuration config =  new Configuration("target/adb-" + timestamp + "/" + index);
 
 		MockedExecutor executor = new MockedExecutor();
-		try (DefaultAnalyticsDb db = new DefaultAnalyticsDb(config, new MBassador(), executor)) {
+		try (DefaultAnalyticsDb db = new DefaultAnalyticsDb(config, executor)) {
 			db.open();
 		} catch (AlreadyClosedException e) {
 			System.out.println("exception on " + index);

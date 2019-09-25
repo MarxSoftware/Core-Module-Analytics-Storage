@@ -22,7 +22,6 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
  * #L%
  */
 import org.testng.annotations.Test;
-import net.engio.mbassy.bus.MBassador;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -39,7 +38,7 @@ public class ShardUpdateTest {
 	public void setup() {
 		Configuration config = new Configuration("target/test_update");
 		
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}

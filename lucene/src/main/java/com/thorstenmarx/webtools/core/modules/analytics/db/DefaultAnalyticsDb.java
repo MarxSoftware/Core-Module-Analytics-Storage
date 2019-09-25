@@ -71,12 +71,12 @@ public class DefaultAnalyticsDb extends AbstractAnalyticsDb<LuceneIndex> {
 	
 	private final Executor executor;
 
-	public DefaultAnalyticsDb(final Configuration configuration, final MBassador eventBus, final Executor executor) {
+	public DefaultAnalyticsDb(final Configuration configuration, final Executor executor) {
 		this.configuration = configuration;
 		this.executor = executor;
 
 		this.analyticsPipline = new SequentialPipeline();
-		this.analyticsPipline.addStage(new DBUpdateStage(eventBus));
+		this.analyticsPipline.addStage(new DBUpdateStage());
 	}
 	
 	public Executor getExecutor () {
