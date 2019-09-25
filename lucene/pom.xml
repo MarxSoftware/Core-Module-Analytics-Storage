@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.thorstenmarx.webtools.core.modules.analytics</groupId>
+		<artifactId>analytics-storage</artifactId>
+		<version>1.2.0</version>
+	</parent>
+	<artifactId>analytics-storage-lucene</artifactId>
+	<packaging>jar</packaging>
+	
+	<properties>
+		<lucene.version>8.2.0</lucene.version>
+		<leveldb.version>1.1</leveldb.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.thorstenmarx.webtools.core.modules.analytics</groupId>
+			<artifactId>analytics-storage-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.thorstenmarx.webtools</groupId>
+			<artifactId>webtools-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-core</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-analyzers-common</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-memory</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-backward-codecs</artifactId>
+			<version>${lucene.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.xerial.snappy</groupId>
+			<artifactId>snappy-java</artifactId>
+			<version>1.1.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.pcmind</groupId>
+			<artifactId>leveldb-api</artifactId>
+			<version>${leveldb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.pcmind</groupId>
+			<artifactId>leveldb</artifactId>
+			<version>${leveldb.version}</version>
+		</dependency>
+	</dependencies>
+</project>
