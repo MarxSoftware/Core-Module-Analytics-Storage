@@ -76,7 +76,7 @@ public class DBUpdateStage implements Stage {
 			eventContext.db().index().add(new IndexDocument(object.getJSONObject("data")));
 			
 			TrackedEvent event = new TrackedEvent(object);
-			eventBus.publishAsync(event);
+			//eventBus.publishAsync(event);
 		} catch (IOException ex) {
 			LOGGER.log(Level.SEVERE, "", ex);
 		}
