@@ -46,7 +46,7 @@ public class PerformanceTest {
 	DefaultAnalyticsDb instance;
 	MockedExecutor executor = new MockedExecutor();
 
-	private static final int COUNT = 10000;
+	private static final int COUNT = 1000;
 	
 	private static final int INVOCATIONS = 5;
 	private AtomicLong writing = new AtomicLong(0);
@@ -71,7 +71,7 @@ public class PerformanceTest {
 		System.out.println("reading : " + (reading.get() / INVOCATIONS) + "ms");
 	}
 
-	@Test(invocationCount = INVOCATIONS)
+	@Test(invocationCount = INVOCATIONS, enabled = false)
 	public void test_performance () {
 		long size = instance.index().size();
 		long before = System.currentTimeMillis();
