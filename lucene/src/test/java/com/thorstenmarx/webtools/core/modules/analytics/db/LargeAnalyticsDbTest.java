@@ -41,7 +41,6 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
 import com.alibaba.fastjson.JSONObject;
 import com.thorstenmarx.webtools.api.analytics.Fields;
 import java.util.UUID;
-import net.engio.mbassy.bus.MBassador;
 import org.testng.annotations.Test;
 
 /**
@@ -62,7 +61,7 @@ public class LargeAnalyticsDbTest {
 		
 
 		MockedExecutor executor = new MockedExecutor();
-		DefaultAnalyticsDb instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		DefaultAnalyticsDb instance = new DefaultAnalyticsDb(config, executor);
 		instance.open();
 
 		for (int i = 0; i < 100000; i++) {

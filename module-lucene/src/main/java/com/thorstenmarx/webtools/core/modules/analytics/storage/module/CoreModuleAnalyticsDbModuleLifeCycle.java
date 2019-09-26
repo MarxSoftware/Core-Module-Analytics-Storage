@@ -53,7 +53,7 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 
 		final CoreModuleContext context = getCoreModuleContext();
 		
-		internal_analyticsDb = new DefaultAnalyticsDb(config, context.getEventBus(), ((CoreModuleContext)getContext()).getExecutor());
+		internal_analyticsDb = new DefaultAnalyticsDb(config, context.getExecutor());
         internal_analyticsDb.open();
 		
 		if (getCoreModuleContext().isCluster()) {

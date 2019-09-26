@@ -28,12 +28,8 @@ import org.testng.annotations.Test;
 import com.thorstenmarx.webtools.api.analytics.Fields;
 import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
 import com.thorstenmarx.webtools.api.analytics.query.Query;
-import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
-import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
-import com.thorstenmarx.webtools.core.modules.analytics.db.TestHelper;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import net.engio.mbassy.bus.MBassador;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -51,7 +47,7 @@ public class RealtimeDbTest {
 	public void setup() {
 		Configuration config = new Configuration("target/RealtimeDbTest-" + System.currentTimeMillis());
 
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}

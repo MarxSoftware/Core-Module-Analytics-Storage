@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.thorstenmarx.webtools.api.analytics.Fields;
-import com.thorstenmarx.webtools.api.analytics.TrackedEvent;
 import com.thorstenmarx.webtools.api.analytics.Versions;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
 import com.thorstenmarx.webtools.core.modules.analytics.util.pipeline.PipelineContext;
@@ -46,10 +45,9 @@ import net.engio.mbassy.bus.MBassador;
 public class DBUpdateStage implements Stage {
 
 	private static final Logger LOGGER = Logger.getLogger(DBUpdateStage.class.getName());
-	final MBassador eventBus;
 	
-	public DBUpdateStage (final MBassador eventBus) {
-		this.eventBus = eventBus;
+	
+	public DBUpdateStage () {
 	}
 	
 	@Override
@@ -74,9 +72,6 @@ public class DBUpdateStage implements Stage {
 		try {
 			// update index
 			eventContext.db().index().add(new IndexDocument(object.getJSONObject("data")));
-			
-			TrackedEvent event = new TrackedEvent(object);
-			//eventBus.publishAsync(event);
 		} catch (IOException ex) {
 			LOGGER.log(Level.SEVERE, "", ex);
 		}

@@ -34,7 +34,6 @@ import com.thorstenmarx.webtools.api.analytics.query.Query;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import net.engio.mbassy.bus.MBassador;
 import org.awaitility.Awaitility;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -52,7 +51,7 @@ public class AnalyticsDbTest {
 	public void setup() {
 		Configuration config = new Configuration("target/AnalyticsDbTest-" + System.currentTimeMillis());
 		
-		instance = new DefaultAnalyticsDb(config, new MBassador(), executor);
+		instance = new DefaultAnalyticsDb(config, executor);
 
 		instance.open();
 	}
