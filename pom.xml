@@ -16,8 +16,8 @@
 		</license>
 	</licenses>
 	<organization>
-		<name>Thorsten Marx</name>
-		<url>https://thorstenmarx.com</url>
+		<name>WP DigitalExperience</name>
+		<url>https://wp-digitalexperience.com</url>
 	</organization>
 
 	<modules>
@@ -133,12 +133,22 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-http</artifactId>
+				<version>3.3.3</version>
+			</extension>
+		</extensions>
 	</build>
 	<repositories>
 		<repository>
-			<id>oracleReleases</id>
-			<name>Oracle Released Java Packages</name>
-			<url>http://download.oracle.com/maven</url>
+			<id>wp-digitalexperience-ftp</id>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+			<url>https://maven.wp-digitalexperience.com/</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
