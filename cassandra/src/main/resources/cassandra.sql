@@ -12,3 +12,6 @@ CREATE TABLE events (
 	source text,
     PRIMARY KEY (id, type, site)
 );
+
+CREATE INDEX site_index ON events(site);
+CREATE INDEX type_index ON events(type);

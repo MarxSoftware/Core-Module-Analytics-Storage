@@ -74,7 +74,7 @@ public class CassandraAnalyticsDb extends AbstractAnalyticsDb<CassandraIndex> {
 	public CassandraAnalyticsDb(final Configuration configuration, final MBassador eventBus,  final CqlSession session) {
 		this.configuration = configuration;
 		this.analyticsPipline = new SequentialPipeline();
-		this.analyticsPipline.addStage(new DBUpdateStage(eventBus));
+		this.analyticsPipline.addStage(new DBUpdateStage());
 		this.session = session;
 	}
 

@@ -23,8 +23,8 @@
 	<modules>
 		<module>api</module>
 		<module>lucene</module>
-		<!--module>elastic</module>
-		<module>cassandra</module-->
+		<!--module>elastic</module-->
+		<!--module>cassandra</module-->
 		<module>module-lucene</module>
 	</modules>
 	<properties>
