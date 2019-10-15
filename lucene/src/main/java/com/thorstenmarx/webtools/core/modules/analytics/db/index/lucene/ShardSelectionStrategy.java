@@ -25,8 +25,11 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene;
 /**
  *
  * @author marx
+ * @param <T>
  */
 public interface ShardSelectionStrategy<T extends Shard> {
 	
 	T next();
+	
+	T route (final String key);
 }

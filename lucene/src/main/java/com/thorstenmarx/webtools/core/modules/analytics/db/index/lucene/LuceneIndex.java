@@ -21,6 +21,7 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
+import com.thorstenmarx.webtools.api.analytics.Fields;
 import com.thorstenmarx.webtools.api.analytics.query.Query;
 
 import com.thorstenmarx.webtools.api.analytics.query.ShardDocument;
@@ -28,6 +29,7 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.Index;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.HashShardSelectionStrategy;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.RoundRobinShardSelectionStrategy;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.shard.LuceneShard;
 import java.io.File;
@@ -83,7 +85,8 @@ public class LuceneIndex implements Index, AutoCloseable {
 		this.adb = adb;
 
 		this.shardCount = configuration.shards;
-		this.shardSelectionStrategy = new RoundRobinShardSelectionStrategy(shards);
+//		this.shardSelectionStrategy = new RoundRobinShardSelectionStrategy(shards);
+		this.shardSelectionStrategy = new HashShardSelectionStrategy<>(shards);
 	}
 
 	/**
@@ -213,7 +216,7 @@ public class LuceneIndex implements Index, AutoCloseable {
 	}
 
 	private LuceneShard selectShard(final IndexDocument document) {
-		return shardSelectionStrategy.next();
+		return shardSelectionStrategy.next(document.json.getJSONObject("data").getString(Fields._UUID.value()));
 	}
 
 	protected List<LuceneShard> getShards() {

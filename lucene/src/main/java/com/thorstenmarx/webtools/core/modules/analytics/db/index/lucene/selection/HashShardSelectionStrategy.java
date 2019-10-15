@@ -25,6 +25,11 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selecti
 import com.google.common.collect.Iterators;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.ShardSelectionStrategy;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.ConsistentHashRouter;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.Node;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.sample.MyServiceNode;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,36 +38,46 @@ import java.util.List;
  * @author marx
  * @param <T>
  */
-public class RoundRobinShardSelectionStrategy<T extends Shard> implements ShardSelectionStrategy<T> {
+public class HashShardSelectionStrategy<T extends Shard> implements ShardSelectionStrategy<T> {
 
 	private final int shardCount;
 	private Iterator<T> it;
+	private final ConsistentHashRouter<ShardNode<T>> consistentHashRouter;
 
-	public RoundRobinShardSelectionStrategy(final List<T> shards) {
+	public HashShardSelectionStrategy(final List<T> shards) {
 		it = Iterators.cycle(shards);
 		this.shardCount = shards.size();
+		
+		List<ShardNode<T>> shardNodes = new ArrayList<>();
+		shards.stream().map((s) -> new ShardNode(s)).forEach(shardNodes::add);
+
+        //hash them to hash ring
+        consistentHashRouter = new ConsistentHashRouter<>(shardNodes,0);
 	}
 
 	@Override
 	public synchronized T next() {
-		T shard = it.next();
-//		int inv_count = 0;
-//		while (shard.isLocked()) {
-//			shard = it.next();
-//			
-//			if (inv_count == shardCount) {
-//				return shard;
-//			}
-//			
-//			inv_count++;
-//		}
-
-		return shard;
+		throw new UnsupportedOperationException("not supported by hash function");
 	}
 
 	@Override
 	public T route(final String key) {
-		return next();
+		return consistentHashRouter.routeNode(key).shard;
 	}
+	
+	private static class ShardNode<T extends Shard> implements Node {
 
+		protected final T shard;
+
+		public ShardNode(final T shard) {
+			this.shard = shard;
+		}
+		
+		
+		@Override
+		public String getKey() {
+			return shard.getName();
+		}
+		
+	}
 }
