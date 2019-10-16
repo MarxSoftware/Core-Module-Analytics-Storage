@@ -27,9 +27,7 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.ShardSelectionStrategy;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.ConsistentHashRouter;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.Node;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.selection.hash.sample.MyServiceNode;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +50,7 @@ public class HashShardSelectionStrategy<T extends Shard> implements ShardSelecti
 		shards.stream().map((s) -> new ShardNode(s)).forEach(shardNodes::add);
 
         //hash them to hash ring
-        consistentHashRouter = new ConsistentHashRouter<>(shardNodes,0);
+        consistentHashRouter = new ConsistentHashRouter<>(shardNodes, 1);
 	}
 
 	@Override

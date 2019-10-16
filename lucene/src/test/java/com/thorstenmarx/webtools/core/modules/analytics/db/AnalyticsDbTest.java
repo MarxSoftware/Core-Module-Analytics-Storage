@@ -294,10 +294,13 @@ public class AnalyticsDbTest {
 		test = new HashMap<>();
 		test.put("name", "klaus_testQueryMultivalueterms");
 		event.put("test", test);
+		event.put(Fields._UUID.value(), UUID.randomUUID().toString());
 		instance.track(TestHelper.event(event, meta));
 
 //		Thread.sleep(5000);
-		Awaitility.await().atMost(60, TimeUnit.SECONDS).until((Callable<Boolean>) () -> instance.index().size() >= (count+2));
+		Awaitility.await().atMost(60, TimeUnit.SECONDS).until((Callable<Boolean>) () -> {
+			return instance.index().size() >= (count+2);
+		});
 
 		long startTime = timestamp - (1000 * 60 * 60);
 		long endTime = timestamp + (1000 * 60 * 60);

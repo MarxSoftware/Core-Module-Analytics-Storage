@@ -71,7 +71,7 @@ public class LuceneIndex implements Index, AutoCloseable {
 
 	final DefaultAnalyticsDb adb;
 
-	private final ShardSelectionStrategy<LuceneShard> shardSelectionStrategy;
+	private ShardSelectionStrategy<LuceneShard> shardSelectionStrategy;
 
 	private boolean closed = false;
 
@@ -86,11 +86,11 @@ public class LuceneIndex implements Index, AutoCloseable {
 
 		this.shardCount = configuration.shards;
 //		this.shardSelectionStrategy = new RoundRobinShardSelectionStrategy(shards);
-		this.shardSelectionStrategy = new HashShardSelectionStrategy<>(shards);
 	}
 
 	/**
 	 *
+	 * @return 
 	 * @throws IOException If something goes wrong.
 	 */
 	@Override
@@ -127,6 +127,9 @@ public class LuceneIndex implements Index, AutoCloseable {
 			createShard();
 			count++;
 		}
+		
+		this.shardSelectionStrategy = new HashShardSelectionStrategy<>(shards);
+//		this.shardSelectionStrategy = new RoundRobinShardSelectionStrategy<>(shards);
 
 		closed = false;
 
@@ -216,7 +219,7 @@ public class LuceneIndex implements Index, AutoCloseable {
 	}
 
 	private LuceneShard selectShard(final IndexDocument document) {
-		return shardSelectionStrategy.next(document.json.getJSONObject("data").getString(Fields._UUID.value()));
+		return shardSelectionStrategy.route(document.json.getString(Fields._UUID.value()));
 	}
 
 	protected List<LuceneShard> getShards() {
