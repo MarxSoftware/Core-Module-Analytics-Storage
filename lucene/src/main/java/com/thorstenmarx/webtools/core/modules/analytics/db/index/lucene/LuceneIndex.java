@@ -211,7 +211,6 @@ public class LuceneIndex implements Index, AutoCloseable {
 		try {
 			final LuceneShard shard = selectShard(document);
 			shard.addToLog(document);
-//			shard.reopen_internal();
 		} catch (IOException e) {
 			LOGGER.error("", e);
 			throw e;

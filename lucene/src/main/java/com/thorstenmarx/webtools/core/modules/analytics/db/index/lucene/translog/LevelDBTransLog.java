@@ -135,6 +135,11 @@ public class LevelDBTransLog implements TransLog {
 	}
 
 	@Override
+	public void flush() {
+		commit();
+	}
+		
+	@Override
 	public void close() throws IOException {
 		db.close();
 		memoryShard.close();

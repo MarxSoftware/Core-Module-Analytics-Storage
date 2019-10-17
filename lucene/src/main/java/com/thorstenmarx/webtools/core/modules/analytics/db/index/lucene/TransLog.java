@@ -49,4 +49,6 @@ public interface TransLog extends AutoCloseable {
 	
 	public boolean isLocked();
 	
+	void flush ();
+	
 }
