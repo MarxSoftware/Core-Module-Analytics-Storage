@@ -22,7 +22,7 @@ import com.thorstenmarx.modules.api.ModuleLifeCycleExtension;
 import com.thorstenmarx.modules.api.annotation.Extension;
 import com.thorstenmarx.webtools.api.CoreModuleContext;
 import com.thorstenmarx.webtools.api.analytics.AnalyticsDB;
-import com.thorstenmarx.webtools.core.modules.analytics.db.cluster.ClusterAnalyticsDb;
+import com.thorstenmarx.webtools.core.modules.analytics.storage.module.cluster.ClusterAnalyticsDb;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import java.io.File;
@@ -58,16 +58,12 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 		
 		if (getCoreModuleContext().isCluster()) {
 			analyticsDb = cluster_analyticsDb;
-			cluster_analyticsDb = new ClusterAnalyticsDb(internal_analyticsDb, getCoreModuleContext().getCluster());
+			cluster_analyticsDb = new ClusterAnalyticsDb(internal_analyticsDb, getCoreModuleContext());
 		} else {
 			analyticsDb = internal_analyticsDb;
 		}
 		
 		getContext().serviceRegistry().register(AnalyticsDB.class, analyticsDb);
-		
-//		if (context.isCluster()) {
-//			context.getCluster().
-//		}
 	}
 
 	@Override

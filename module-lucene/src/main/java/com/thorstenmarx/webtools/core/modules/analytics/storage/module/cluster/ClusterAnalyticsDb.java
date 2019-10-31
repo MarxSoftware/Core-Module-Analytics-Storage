@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.thorstenmarx.webtools.core.modules.analytics.db.cluster;
+package com.thorstenmarx.webtools.core.modules.analytics.storage.module.cluster;
 
 /*-
  * #%L
@@ -38,6 +38,7 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.cluster;
  * #L%
  */
 import com.google.gson.Gson;
+import com.thorstenmarx.webtools.api.CoreModuleContext;
 import com.thorstenmarx.webtools.api.analytics.AnalyticsDB;
 import com.thorstenmarx.webtools.api.analytics.Filter;
 import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
@@ -46,9 +47,11 @@ import com.thorstenmarx.webtools.api.analytics.query.Query;
 import com.thorstenmarx.webtools.api.analytics.query.ShardedQuery;
 import com.thorstenmarx.webtools.api.cluster.Cluster;
 import com.thorstenmarx.webtools.api.cluster.Message;
+import com.thorstenmarx.webtools.api.cluster.services.MessageReplicator;
 import com.thorstenmarx.webtools.api.cluster.services.MessageService;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -59,25 +62,26 @@ import org.slf4j.LoggerFactory;
  *
  * @author marx
  */
-public class ClusterAnalyticsDb implements AnalyticsDB, MessageService.MessageListener {
+public class ClusterAnalyticsDb implements AnalyticsDB, MessageReplicator.Handler<ClusterAnalyticsDb.PayloadTrack> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusterAnalyticsDb.class);
-	
+
 	private static final String EVENT_TRACK = "event_track";
-	
+
 	private final DefaultAnalyticsDb db;
 	private final Cluster cluster;
 	Gson gson = new Gson();
+	MessageReplicator<PayloadTrack> replicator;
 
-	public ClusterAnalyticsDb(final DefaultAnalyticsDb db, final Cluster cluster) {
+	public ClusterAnalyticsDb(final DefaultAnalyticsDb db, final CoreModuleContext context) {
 		this.db = db;
-		this.cluster = cluster;
-		
-		this.cluster.getMessageService().registerMessageListener(this);
+		this.cluster = context.getCluster();
+
+		replicator = this.cluster.createReplicator(EVENT_TRACK, context.getExecutor(), this, PayloadTrack.class);
 	}
-	
-	public void close () {
-		this.cluster.getMessageService().unregisterMessageListener(this);
+
+	public void close() throws Exception {
+		this.replicator.close();
 	}
 
 	@Override
@@ -92,15 +96,12 @@ public class ClusterAnalyticsDb implements AnalyticsDB, MessageService.MessageLi
 
 	@Override
 	public void track(final Map<String, Map<String, Object>> event) {
-		try {
-			PayloadTrack payload = new PayloadTrack();
-			payload.event = event;
-			
-			Message message = new Message().setType(EVENT_TRACK).setPayload(gson.toJson(payload));
-			cluster.getMessageService().publish(message);
-		} catch (IOException ex) {
-			LOGGER.error("", ex);
-		}
+		PayloadTrack payload = new PayloadTrack();
+		payload.event = event;
+
+		replicator.replicate(payload);
+		
+		db.track(event);
 	}
 
 	@Override
@@ -119,15 +120,13 @@ public class ClusterAnalyticsDb implements AnalyticsDB, MessageService.MessageLi
 	}
 
 	@Override
-	public void handle(final Message message) {
-		if (EVENT_TRACK.equals(message.getType())) {
-			PayloadTrack payload = gson.fromJson(message.getPayload(), PayloadTrack.class);
-			db.track(payload.event);
-		}
+	public void handle(PayloadTrack message) {
+		db.track(message.event);
 	}
-	
-	public static class PayloadTrack {
+
+	public static class PayloadTrack implements Serializable {
+
 		public Map<String, Map<String, Object>> event;
 	}
-	
+
 }
