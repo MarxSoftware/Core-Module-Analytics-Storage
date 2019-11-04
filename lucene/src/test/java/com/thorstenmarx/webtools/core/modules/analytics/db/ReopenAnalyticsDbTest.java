@@ -43,7 +43,7 @@ public class ReopenAnalyticsDbTest {
 	
 	@BeforeMethod
 	public void open () {
-		config = new Configuration("target/ReopenAnalyticsDbTest-" + System.currentTimeMillis());
+		config = TestHelper.getConfiguration("target/ReopenAnalyticsDbTest-" + System.currentTimeMillis());
 
 		executor = new MockedExecutor();
 		instance = new DefaultAnalyticsDb(config, executor);

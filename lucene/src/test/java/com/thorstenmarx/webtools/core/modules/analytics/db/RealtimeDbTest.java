@@ -45,7 +45,7 @@ public class RealtimeDbTest {
 
 	@BeforeClass
 	public void setup() {
-		Configuration config = new Configuration("target/RealtimeDbTest-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/RealtimeDbTest-" + System.currentTimeMillis());
 
 		instance = new DefaultAnalyticsDb(config, executor);
 

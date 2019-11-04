@@ -49,7 +49,7 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 	
 	@Override
 	public void activate() {
-		Configuration config = new Configuration(configuration.getDataDir().getAbsolutePath());
+		Configuration config = new Configuration(configuration);
 
 		final CoreModuleContext context = getCoreModuleContext();
 		

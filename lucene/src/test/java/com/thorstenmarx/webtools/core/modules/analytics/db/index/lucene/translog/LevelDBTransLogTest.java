@@ -29,6 +29,7 @@ import com.thorstenmarx.webtools.api.analytics.query.ShardDocument;
 import com.thorstenmarx.webtools.api.execution.Executor;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
 import com.thorstenmarx.webtools.core.modules.analytics.db.MockedExecutor;
+import com.thorstenmarx.webtools.core.modules.analytics.db.TestHelper;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
@@ -56,7 +57,7 @@ public class LevelDBTransLogTest extends TransLogTest {
 
 	@BeforeMethod
 	public void setUpClass() throws Exception {
-		Configuration config = new Configuration("target/translog-test-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/translog-test-" + System.currentTimeMillis());
 		
 		shard = new MockShard();
 		translog = new LevelDBTransLog(config, shard, executor);

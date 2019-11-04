@@ -57,7 +57,7 @@ public class LargeAnalyticsDbTest {
 		
 		System.out.println("running large analytics db test");
 
-		Configuration config = new Configuration("target/adb-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/adb-" + System.currentTimeMillis());
 		
 
 		MockedExecutor executor = new MockedExecutor();

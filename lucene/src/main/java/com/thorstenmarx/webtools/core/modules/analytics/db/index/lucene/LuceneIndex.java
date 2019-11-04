@@ -62,7 +62,7 @@ public class LuceneIndex implements Index, AutoCloseable {
 	 */
 	private final List<LuceneShard> shards = new ArrayList<>();
 
-	private static final int DEFAULT_SHARD_COUNT = 10;
+	public static final int DEFAULT_SHARD_COUNT = 3;
 	private int shardCount = DEFAULT_SHARD_COUNT;
 
 	private String indexPath;
@@ -129,7 +129,6 @@ public class LuceneIndex implements Index, AutoCloseable {
 		}
 		
 		this.shardSelectionStrategy = new HashShardSelectionStrategy<>(shards);
-//		this.shardSelectionStrategy = new RoundRobinShardSelectionStrategy<>(shards);
 
 		closed = false;
 

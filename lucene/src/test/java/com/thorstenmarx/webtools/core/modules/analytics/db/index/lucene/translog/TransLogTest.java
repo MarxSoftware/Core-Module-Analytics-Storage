@@ -25,6 +25,7 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.TransLog
 import com.alibaba.fastjson.JSONObject;
 import com.thorstenmarx.webtools.api.analytics.Fields;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
+import com.thorstenmarx.webtools.core.modules.analytics.db.TestHelper;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public abstract class TransLogTest {
 	@Test()
 	public void test_existing() throws IOException {
 
-		Configuration config = new Configuration("target/translog-test-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/translog-test-" + System.currentTimeMillis());
 		
 
 		try (TransLog tlog = translog(config)) {

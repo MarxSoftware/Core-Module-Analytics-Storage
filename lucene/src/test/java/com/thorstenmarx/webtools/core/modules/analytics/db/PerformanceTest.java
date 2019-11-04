@@ -54,7 +54,7 @@ public class PerformanceTest {
 
 	@BeforeClass
 	public void setup() {
-		Configuration config = new Configuration("target/performance-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/performance-" + System.currentTimeMillis());
 
 		instance = new DefaultAnalyticsDb(config, executor);
 

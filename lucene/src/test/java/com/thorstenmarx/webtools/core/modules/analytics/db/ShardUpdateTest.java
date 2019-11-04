@@ -36,7 +36,7 @@ public class ShardUpdateTest {
 	
 	@BeforeClass(enabled = false)
 	public void setup() {
-		Configuration config = new Configuration("target/test_update");
+		Configuration config = TestHelper.getConfiguration("target/test_update");
 		
 		instance = new DefaultAnalyticsDb(config, executor);
 

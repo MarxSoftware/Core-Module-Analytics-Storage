@@ -38,7 +38,7 @@ public class AlreadyClosedExceptionIssueTest {
 	@Test(invocationCount = 20)
 	public void openCloseTest() throws InterruptedException, Exception {
 		int index = counter.incrementAndGet();
-		Configuration config =  new Configuration("target/adb-" + timestamp + "/" + index);
+		Configuration config =  TestHelper.getConfiguration("target/adb-" + timestamp + "/" + index);
 
 		MockedExecutor executor = new MockedExecutor();
 		try (DefaultAnalyticsDb db = new DefaultAnalyticsDb(config, executor)) {

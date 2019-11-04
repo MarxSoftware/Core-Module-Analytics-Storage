@@ -49,7 +49,7 @@ public class AnalyticsDbTest {
 	
 	@BeforeClass
 	public void setup() {
-		Configuration config = new Configuration("target/AnalyticsDbTest-" + System.currentTimeMillis());
+		Configuration config = TestHelper.getConfiguration("target/AnalyticsDbTest-" + System.currentTimeMillis());
 		
 		instance = new DefaultAnalyticsDb(config, executor);
 
