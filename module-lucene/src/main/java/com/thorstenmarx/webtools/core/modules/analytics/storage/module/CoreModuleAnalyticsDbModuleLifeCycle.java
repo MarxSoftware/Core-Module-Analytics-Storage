@@ -49,9 +49,8 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 	
 	@Override
 	public void activate() {
-		Configuration config = new Configuration(configuration);
-
 		final CoreModuleContext context = getCoreModuleContext();
+		Configuration config = new Configuration(configuration, context);
 		
 		internal_analyticsDb = new DefaultAnalyticsDb(config, context.getExecutor());
         internal_analyticsDb.open();
