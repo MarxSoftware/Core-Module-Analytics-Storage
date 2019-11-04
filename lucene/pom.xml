@@ -10,7 +10,7 @@
 	<packaging>jar</packaging>
 	
 	<properties>
-		<lucene.version>8.2.0</lucene.version>
+		<lucene.version>8.3.0</lucene.version>
 		<leveldb.version>1.1</leveldb.version>
 	</properties>
 
