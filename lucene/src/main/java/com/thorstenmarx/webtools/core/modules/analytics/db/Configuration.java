@@ -1,6 +1,7 @@
 package com.thorstenmarx.webtools.core.modules.analytics.db;
 
 import com.thorstenmarx.modules.api.ModuleConfiguration;
+import com.thorstenmarx.webtools.api.ModuleContext;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.LuceneIndex;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
 
@@ -22,8 +23,10 @@ public class Configuration {
 	public Configuration(final String directory) {
 		this(directory, LuceneIndex.DEFAULT_SHARD_COUNT, LevelDBTransLog.DEFAULT_MAX_SIZE);
 	}
-	public Configuration(final ModuleConfiguration configuration) {
-		this(configuration.getDataDir().getAbsolutePath(), configuration.getInt("analyticsdb.shard.count", LuceneIndex.DEFAULT_SHARD_COUNT), LevelDBTransLog.DEFAULT_MAX_SIZE);
+	public Configuration(final ModuleConfiguration configuration, final ModuleContext context) {
+		this(configuration.getDataDir().getAbsolutePath(), 
+				context.get("analyticsdb.shard.count", Integer.class, LuceneIndex.DEFAULT_SHARD_COUNT), 
+				LevelDBTransLog.DEFAULT_MAX_SIZE);
 	}
 	
 }
