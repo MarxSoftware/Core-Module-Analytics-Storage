@@ -30,7 +30,7 @@ import java.util.concurrent.locks.Lock;
  *
  * @author marx
  */
-public interface TransLog extends AutoCloseable {
+public interface CommitLog extends AutoCloseable {
 
 	void append(final IndexDocument document) throws IOException;
 

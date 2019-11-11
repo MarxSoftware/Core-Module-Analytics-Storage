@@ -1,5 +1,5 @@
 
-package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog;
+package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog;
 
 /*-
  * #%L

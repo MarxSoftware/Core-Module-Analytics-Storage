@@ -1,4 +1,4 @@
-package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog;
+package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog;
 
 /*-
  * #%L
@@ -21,7 +21,7 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translo
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.TransLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.CommitLog;
 import com.alibaba.fastjson.JSONObject;
 import com.thorstenmarx.webtools.api.analytics.Fields;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
@@ -39,35 +39,35 @@ import org.testng.annotations.Test;
  *
  * @author marx
  */
-public abstract class TransLogTest {
+public abstract class CommitLogTest {
 
-	public abstract TransLog translog();
+	public abstract CommitLog commitlog();
 
-	public abstract TransLog translog(Configuration config);
+	public abstract CommitLog commitlog(Configuration config);
 	
 	public abstract Shard shard ();
 
 	@Test
 	public void test_append() throws IOException {
 		IndexDocument doc = createDoc("eins");
-		translog().append(doc);
+		commitlog().append(doc);
 		doc = createDoc("zwei");
-		translog().append(doc);
+		commitlog().append(doc);
 	}
 
 	@Test(invocationCount = 10)
 	public void test_auto_reopen() throws IOException {
-		Assertions.assertThat(translog().size()).isEqualTo(0);
+		Assertions.assertThat(commitlog().size()).isEqualTo(0);
 
-		for (int i = 0; i <= translog().maxSize(); i++) {
-			translog().append(createDoc("horst " + i));
+		for (int i = 0; i <= commitlog().maxSize(); i++) {
+			commitlog().append(createDoc("horst " + i));
 		}
 		
 
 		Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> {
-			return  (shard().size() == translog().maxSize()+1 && translog().size() == 0)
+			return  (shard().size() == commitlog().maxSize()+1 && commitlog().size() == 0)
 					||
-					(shard().size() == translog().maxSize() && translog().size() == 1);
+					(shard().size() == commitlog().maxSize() && commitlog().size() == 1);
 		});
 	}
 
@@ -77,14 +77,14 @@ public abstract class TransLogTest {
 		Configuration config = TestHelper.getConfiguration("target/translog-test-" + System.currentTimeMillis());
 		
 
-		try (TransLog tlog = translog(config)) {
+		try (CommitLog tlog = commitlog(config)) {
 			tlog.open();
 
 			tlog.append(createDoc("horst"));
 			tlog.append(createDoc("klaus"));
 		}
 
-		try (TransLog tlog = translog(config)) {
+		try (CommitLog tlog = commitlog(config)) {
 			tlog.open();
 
 			Assertions.assertThat(tlog.size()).isEqualTo(2);

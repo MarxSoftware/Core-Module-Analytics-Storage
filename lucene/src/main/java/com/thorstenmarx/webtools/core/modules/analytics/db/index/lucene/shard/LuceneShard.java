@@ -31,8 +31,8 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.ShardVersion;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.TransLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.LevelDBCommitLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.CommitLog;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -86,7 +86,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	private File shardDir;
 
-	private TransLog transLog;
+	private CommitLog commitLog;
 
 	final DefaultAnalyticsDb adb;
 
@@ -199,8 +199,8 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		this.timeTo = getMaxTimestamp();
 		this.timeFrom = getMinTimestamp();
 
-		this.transLog = new LevelDBTransLog(configuration, this, adb.getExecutor());
-		transLog.open();
+		this.commitLog = new LevelDBCommitLog(configuration, this, adb.getExecutor());
+		commitLog.open();
 
 		contentStore = new ContentStore(shardDir);
 		contentStore.open();
@@ -231,8 +231,8 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 //		if (reopenTask != null) {
 //			reopenTask.cancel(true);
 //		}
-		if (transLog != null) {
-			transLog.close();
+		if (commitLog != null) {
+			commitLog.close();
 		}
 		if (indexAccess != null) {
 			indexAccess.close();
@@ -276,7 +276,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 	}
 
 	public void addToLog(IndexDocument document) throws IOException {
-		transLog.append(document);
+		commitLog.append(document);
 	}
 
 	public void delete(Term term) throws IOException {
@@ -289,13 +289,13 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	@Override
 	public List<ShardDocument> search(final Query query) throws IOException {
-		transLog.readLock().lock();
+		commitLog.readLock().lock();
 		IndexSearcher indexSearcher = indexAccess.searcherManager().acquire();
 		try {
 			return internal_search(query, indexSearcher);
 		} finally {
 			indexAccess.searcherManager().release(indexSearcher);
-			transLog.readLock().unlock();
+			commitLog.readLock().unlock();
 		}
 	}
 
@@ -343,7 +343,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		});
 
 		// for realtime search add transaction log data
-		List<ShardDocument> translogDocs = transLog.getSearchable().search(query);
+		List<ShardDocument> translogDocs = commitLog.getSearchable().search(query);
 		result.addAll(translogDocs);
 
 		return Collections.unmodifiableList(result);
@@ -351,7 +351,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	@Override
 	public boolean hasData(long from, long to) {
-		return transLog.getSearchable().hasData(from, to)
+		return commitLog.getSearchable().hasData(from, to)
 				|| (from >= timeFrom && from <= timeTo) // from liegt innerhalb des Shards
 				|| (to >= timeFrom && to <= timeTo) // to liegt innerhalb des Shards
 				|| (from <= timeFrom && to >= timeTo); // der komplette Shard ist eine Teilmenge
@@ -367,11 +367,11 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	@Override
 	public int size() {
-		transLog.readLock().lock();
+		commitLog.readLock().lock();
 		try {
 			IndexSearcher localSearcher = indexAccess.searcherManager().acquire();
 			try {
-				return localSearcher.getIndexReader().numDocs() + transLog.size();
+				return localSearcher.getIndexReader().numDocs() + commitLog.size();
 			} finally {
 				indexAccess.searcherManager().release(localSearcher);
 			}
@@ -379,7 +379,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 			LOGGER.error("", ex);
 			throw new RuntimeException(ex);
 		} finally {
-			transLog.readLock().unlock();
+			commitLog.readLock().unlock();
 		}
 	}
 
@@ -505,7 +505,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	@Override
 	public boolean isLocked() {
-		return transLog.isLocked();
+		return commitLog.isLocked();
 	}
 
 	public static BooleanQuery multivalueTermsToBooleanQuery(Map.Entry<String, String[]> entry) {

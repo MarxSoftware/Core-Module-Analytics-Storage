@@ -1,4 +1,4 @@
-package com.thorstenmarx.webtools.analytics.db.index.lucene.translog;
+package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog;
 
 /*-
  * #%L
@@ -32,9 +32,9 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.MockedExecutor;
 import com.thorstenmarx.webtools.core.modules.analytics.db.TestHelper;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.TransLog;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.TransLogTest;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.LevelDBCommitLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.CommitLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.CommitLogTest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -49,9 +49,9 @@ import org.testng.annotations.Test;
  *
  * @author marx
  */
-public class LevelDBTransLogTest extends TransLogTest {
+public class LevelDBCommitLogTest extends CommitLogTest {
 	
-	private LevelDBTransLog translog;
+	private LevelDBCommitLog commitlog;
 	private MockShard shard;
 	private Executor executor = new MockedExecutor();
 
@@ -60,20 +60,20 @@ public class LevelDBTransLogTest extends TransLogTest {
 		Configuration config = TestHelper.getConfiguration("target/translog-test-" + System.currentTimeMillis());
 		
 		shard = new MockShard();
-		translog = new LevelDBTransLog(config, shard, executor);
-		translog.open();
+		commitlog = new LevelDBCommitLog(config, shard, executor);
+		commitlog.open();
 	}
 
 	@AfterMethod
 	public void tearDownClass() throws Exception {
-		if (translog != null) {
-			translog.close();
+		if (commitlog != null) {
+			commitlog.close();
 		}
 	}
 	
 	@Override
-	public TransLog translog() {
-		return translog;
+	public CommitLog commitlog() {
+		return commitlog;
 	}
 	
 	public Shard shard () {
@@ -81,20 +81,20 @@ public class LevelDBTransLogTest extends TransLogTest {
 	}
 
 	@Override
-	public TransLog translog(final Configuration config) {
-		return new LevelDBTransLog(config, new MockShard(), executor);
+	public CommitLog commitlog(final Configuration config) {
+		return new LevelDBCommitLog(config, new MockShard(), executor);
 	}
 	
 	
 	
 	@Test(invocationCount = 10)
 	public void test_commit_to_shard () throws IOException {
-		System.out.println("SIZE: " + translog.size());
-		for (int i = 0; i < translog.maxSize(); i++) {
-			translog().append(createDoc("horst " + i));
+		System.out.println("SIZE: " + commitlog.size());
+		for (int i = 0; i < commitlog.maxSize(); i++) {
+			commitlog().append(createDoc("horst " + i));
 		}
-		System.out.println("SIZE: " + translog.size());
-		Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> shard.addCount.get() == translog.maxSize());
+		System.out.println("SIZE: " + commitlog.size());
+		Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> shard.addCount.get() == commitlog.maxSize());
 		Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> shard.reopenCount.get() == 1);
 	}
 

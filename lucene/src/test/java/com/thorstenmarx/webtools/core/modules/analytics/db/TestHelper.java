@@ -24,7 +24,7 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
 
 import com.alibaba.fastjson.JSONObject;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.LuceneIndex;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.LevelDBCommitLog;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +51,6 @@ public class TestHelper {
 	}
 	
 	public static Configuration getConfiguration (final String path) {
-		return new Configuration(path, LuceneIndex.DEFAULT_SHARD_COUNT, LevelDBTransLog.DEFAULT_MAX_SIZE);
+		return new Configuration(path, LuceneIndex.DEFAULT_SHARD_COUNT, LevelDBCommitLog.DEFAULT_MAX_SIZE);
 	}
 }

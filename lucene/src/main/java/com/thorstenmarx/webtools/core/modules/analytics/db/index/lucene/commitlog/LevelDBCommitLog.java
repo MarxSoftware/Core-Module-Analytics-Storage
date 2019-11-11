@@ -1,4 +1,4 @@
-package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog;
+package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog;
 
 /*-
  * #%L
@@ -21,7 +21,6 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translo
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.TransLog;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.thorstenmarx.webtools.api.analytics.Fields;
@@ -30,6 +29,7 @@ import com.thorstenmarx.webtools.api.execution.Executor;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.CommitLog;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import static com.thorstenmarx.webtools.core.modules.analytics.util.FileUtils.addEndingSeparator;
 import static com.thorstenmarx.webtools.core.modules.analytics.util.FileUtils.ensureExistence;
@@ -50,9 +50,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author marx
  */
-public class LevelDBTransLog implements TransLog {
+public class LevelDBCommitLog implements CommitLog {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LevelDBTransLog.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LevelDBCommitLog.class);
 
 	public static final int DEFAULT_MAX_SIZE = 100;
 
@@ -70,7 +70,7 @@ public class LevelDBTransLog implements TransLog {
 	
 	private static final AtomicInteger variableSize = new AtomicInteger(10);
 
-	public LevelDBTransLog(final Configuration config, final Shard shard, final Executor executor) {
+	public LevelDBCommitLog(final Configuration config, final Shard shard, final Executor executor) {
 		this.config = config;
 		this.shard = shard;
 		this.executor = executor;
@@ -154,7 +154,7 @@ public class LevelDBTransLog implements TransLog {
 
 		String dataDir = config.directory;
 		dataDir = addEndingSeparator(dataDir);
-		dataDir += DefaultAnalyticsDb.ANALYTICS_DIR + "/index/" + shard.getName() + "/translog/";
+		dataDir += DefaultAnalyticsDb.ANALYTICS_DIR + "/index/" + shard.getName() + "/commitlog/";
 		ensureExistence(dataDir);
 
 		File dataFile = new File(dataDir);

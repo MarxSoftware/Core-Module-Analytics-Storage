@@ -4,7 +4,7 @@ import com.thorstenmarx.modules.api.ModuleConfiguration;
 import com.thorstenmarx.webtools.api.CoreModuleContext;
 import com.thorstenmarx.webtools.api.ModuleContext;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.LuceneIndex;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.translog.LevelDBTransLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.LevelDBCommitLog;
 
 /**
  *
@@ -22,12 +22,12 @@ public class Configuration {
 		this.translog_maxsize= translog_maxsize;
 	}
 	public Configuration(final String directory) {
-		this(directory, LuceneIndex.DEFAULT_SHARD_COUNT, LevelDBTransLog.DEFAULT_MAX_SIZE);
+		this(directory, LuceneIndex.DEFAULT_SHARD_COUNT, LevelDBCommitLog.DEFAULT_MAX_SIZE);
 	}
 	public Configuration(final ModuleConfiguration configuration, final CoreModuleContext context) {
 		this(configuration.getDataDir().getAbsolutePath(), 
 				context.get("analyticsdb.shard.count", Integer.class, LuceneIndex.DEFAULT_SHARD_COUNT), 
-				LevelDBTransLog.DEFAULT_MAX_SIZE);
+				LevelDBCommitLog.DEFAULT_MAX_SIZE);
 	}
 	
 }
