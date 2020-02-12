@@ -54,9 +54,8 @@ public class DocumentBuilder {
 		Document document = new Document();
 		
 		long timestamp = System.currentTimeMillis();
-		if (json.containsKey(EventContext.KEY_TIMESTAMP)) {
-			timestamp = json.getLongValue(EventContext.KEY_TIMESTAMP);
-			json.remove(EventContext.KEY_TIMESTAMP);
+		if (json.containsKey(Fields._TimeStamp.value())) {
+			timestamp = json.getLongValue(Fields._TimeStamp.value());
 		}
 		document.add(new NumericDocValuesField(Fields._TimeStamp.value(), timestamp));
 		document.add(new LongPoint(Fields.TIMESTAMP_SORT.value(), timestamp));

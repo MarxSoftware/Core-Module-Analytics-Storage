@@ -351,7 +351,8 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	@Override
 	public boolean hasData(long from, long to) {
-		return commitLog.getSearchable().hasData(from, to)
+		final boolean commitlogData = commitLog.getSearchable().hasData(from, to);
+		return commitlogData
 				|| (from >= timeFrom && from <= timeTo) // from liegt innerhalb des Shards
 				|| (to >= timeFrom && to <= timeTo) // to liegt innerhalb des Shards
 				|| (from <= timeFrom && to >= timeTo); // der komplette Shard ist eine Teilmenge
