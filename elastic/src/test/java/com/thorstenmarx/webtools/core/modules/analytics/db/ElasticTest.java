@@ -86,14 +86,14 @@ public class ElasticTest {
 	/**
 	 * Test of open method, of class AnalyticsDb.
 	 */
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void testAnalyticsDb() throws Exception {
 
 		System.out.println("running analytics db test");
 
 		Configuration config = new Configuration(indexName, "localhost:9200");
 
-		try (ElasticAnalyticsDb instance = new ElasticAnalyticsDb(config, new MBassador(), restHighLevelClient)) {
+		try (ElasticAnalyticsDb instance = new ElasticAnalyticsDb(config, restHighLevelClient)) {
 			instance.open();
 
 			JSONObject data = new JSONObject();
@@ -135,14 +135,14 @@ public class ElasticTest {
 		}
 	}
 
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void simple_performance_test() throws Exception {
 
 		System.out.println("running analytics db test");
 
 		Configuration config = new Configuration(indexName, "localhost:9200");
 
-		try (ElasticAnalyticsDb instance = new ElasticAnalyticsDb(config, new MBassador(), restHighLevelClient)) {
+		try (ElasticAnalyticsDb instance = new ElasticAnalyticsDb(config, restHighLevelClient)) {
 			instance.open();
 
 			final long before = System.currentTimeMillis();

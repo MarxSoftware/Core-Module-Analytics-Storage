@@ -71,10 +71,10 @@ public class ElasticAnalyticsDb extends AbstractAnalyticsDb<ElasticIndex> {
 
 	private final RestHighLevelClient client;
 
-	public ElasticAnalyticsDb(final Configuration configuration, final MBassador eventBus,  final RestHighLevelClient elastic) {
+	public ElasticAnalyticsDb(final Configuration configuration, final RestHighLevelClient elastic) {
 		this.configuration = configuration;
 		this.analyticsPipline = new SequentialPipeline();
-		this.analyticsPipline.addStage(new DBUpdateStage(eventBus));
+		this.analyticsPipline.addStage(new DBUpdateStage());
 		this.client = elastic;
 	}
 
