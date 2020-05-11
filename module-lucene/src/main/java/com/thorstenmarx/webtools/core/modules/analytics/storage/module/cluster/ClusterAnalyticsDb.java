@@ -45,12 +45,9 @@ import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
 import com.thorstenmarx.webtools.api.analytics.query.LimitProvider;
 import com.thorstenmarx.webtools.api.analytics.query.Query;
 import com.thorstenmarx.webtools.api.analytics.query.ShardedQuery;
-import com.thorstenmarx.webtools.api.cluster.Cluster;
-import com.thorstenmarx.webtools.api.cluster.Message;
-import com.thorstenmarx.webtools.api.cluster.services.MessageReplicator;
-import com.thorstenmarx.webtools.api.cluster.services.MessageService;
+import com.thorstenmarx.webtools.api.cluster.ClusterMessageAdapter;
+import com.thorstenmarx.webtools.api.cluster.ClusterService;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -62,26 +59,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author marx
  */
-public class ClusterAnalyticsDb implements AnalyticsDB, MessageReplicator.Handler<ClusterAnalyticsDb.PayloadTrack> {
+public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<ClusterAnalyticsDb.PayloadTrack>{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusterAnalyticsDb.class);
 
 	private static final String EVENT_TRACK = "event_track";
 
 	private final DefaultAnalyticsDb db;
-	private final Cluster cluster;
 	Gson gson = new Gson();
-	MessageReplicator<PayloadTrack> replicator;
+	final ClusterService clusterSerivce;
 
-	public ClusterAnalyticsDb(final DefaultAnalyticsDb db, final CoreModuleContext context) {
+	public ClusterAnalyticsDb(final DefaultAnalyticsDb db, final CoreModuleContext context, final ClusterService clusterSerivce) {
 		this.db = db;
-		this.cluster = context.getCluster();
+		this.clusterSerivce = clusterSerivce;
 
-		replicator = this.cluster.createReplicator(EVENT_TRACK, context.getExecutor(), this, PayloadTrack.class);
-	}
-
-	public void close() throws Exception {
-		this.replicator.close();
 	}
 
 	@Override
@@ -99,7 +90,7 @@ public class ClusterAnalyticsDb implements AnalyticsDB, MessageReplicator.Handle
 		PayloadTrack payload = new PayloadTrack();
 		payload.event = event;
 
-		replicator.replicate(payload);
+		clusterSerivce.append(EVENT_TRACK, payload);
 		
 		db.track(event);
 	}
@@ -120,8 +111,22 @@ public class ClusterAnalyticsDb implements AnalyticsDB, MessageReplicator.Handle
 	}
 
 	@Override
-	public void handle(PayloadTrack message) {
-		db.track(message.event);
+	public Class<PayloadTrack> getValueClass() {
+		return PayloadTrack.class;
+	}
+
+	@Override
+	public String getType() {
+		return EVENT_TRACK;
+	}
+
+	@Override
+	public void reset() {
+	}
+
+	@Override
+	public void apply(PayloadTrack value) {
+		db.track(value.event);
 	}
 
 	public static class PayloadTrack implements Serializable {

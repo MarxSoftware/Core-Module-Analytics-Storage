@@ -22,6 +22,7 @@ import com.thorstenmarx.modules.api.ModuleLifeCycleExtension;
 import com.thorstenmarx.modules.api.annotation.Extension;
 import com.thorstenmarx.webtools.api.CoreModuleContext;
 import com.thorstenmarx.webtools.api.analytics.AnalyticsDB;
+import com.thorstenmarx.webtools.api.cluster.ClusterService;
 import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
 import com.thorstenmarx.webtools.core.modules.analytics.db.DefaultAnalyticsDb;
 import com.thorstenmarx.webtools.core.modules.analytics.storage.module.cluster.ClusterAnalyticsDb;
@@ -55,9 +56,9 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 		internal_analyticsDb = new DefaultAnalyticsDb(config, context.getExecutor());
         internal_analyticsDb.open();
 		
-		if (getCoreModuleContext().isCluster()) {
+		if (getContext().serviceRegistry().exits(ClusterService.class)) {
+			cluster_analyticsDb = new ClusterAnalyticsDb(internal_analyticsDb, getCoreModuleContext(), getContext().serviceRegistry().single(ClusterService.class).get());
 			analyticsDb = cluster_analyticsDb;
-			cluster_analyticsDb = new ClusterAnalyticsDb(internal_analyticsDb, getCoreModuleContext());
 		} else {
 			analyticsDb = internal_analyticsDb;
 		}
@@ -71,10 +72,6 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 			getContext().serviceRegistry().unregister(AnalyticsDB.class, analyticsDb);
 			
 			internal_analyticsDb.close();
-			
-			if (getCoreModuleContext().isCluster()) {
-				cluster_analyticsDb.close();
-			}
 		} catch (InterruptedException ex) {
 			LOGGER.error("", ex);
 		} catch (Exception ex) {
