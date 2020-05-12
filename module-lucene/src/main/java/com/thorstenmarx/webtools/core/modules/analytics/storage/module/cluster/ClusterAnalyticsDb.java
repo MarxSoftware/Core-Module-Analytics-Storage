@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author marx
  */
-public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<String>{
+public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<ClusterAnalyticsDb.PayloadTrack>{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusterAnalyticsDb.class);
 
@@ -90,7 +90,7 @@ public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<St
 		PayloadTrack payload = new PayloadTrack();
 		payload.event = event;
 
-		clusterSerivce.append(EVENT_TRACK, gson.toJson(payload));
+		clusterSerivce.append(EVENT_TRACK, payload);
 		
 		db.track(event);
 	}
@@ -111,8 +111,8 @@ public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<St
 	}
 
 	@Override
-	public Class<String> getValueClass() {
-		return String.class;
+	public Class<PayloadTrack> getValueClass() {
+		return PayloadTrack.class;
 	}
 
 	@Override
@@ -125,9 +125,9 @@ public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<St
 	}
 
 	@Override
-	public void apply(String value) {
-		PayloadTrack pt = gson.fromJson(value, PayloadTrack.class);
-		db.track(pt.event);
+	public void apply(PayloadTrack value) {
+//		PayloadTrack pt = gson.fromJson(value, PayloadTrack.class);
+		db.track(value.event);
 	}
 
 	public static class PayloadTrack implements Serializable {
