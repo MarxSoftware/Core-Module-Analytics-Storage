@@ -56,7 +56,7 @@ public class CoreModuleAnalyticsDbModuleLifeCycle extends ModuleLifeCycleExtensi
 		internal_analyticsDb = new DefaultAnalyticsDb(config, context.getExecutor());
         internal_analyticsDb.open();
 		
-		if (getContext().serviceRegistry().exits(ClusterService.class)) {
+		if (getContext().serviceRegistry().exists(ClusterService.class)) {
 			cluster_analyticsDb = new ClusterAnalyticsDb(internal_analyticsDb, getCoreModuleContext(), getContext().serviceRegistry().single(ClusterService.class).get());
 			analyticsDb = cluster_analyticsDb;
 		} else {

@@ -37,7 +37,6 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.shard;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -83,10 +82,12 @@ public class IndexUpdate {
 	private Version updateToLatestIndexVersion(final Directory directory1) throws IOException {
 		LOGGER.debug("upgrade to latest index version");
 		luceneVersion = Version.LATEST;
-		IndexUpgrader upgrader = new IndexUpgrader(directory1);
-		upgrader.upgrade();
+		if (directory1.listAll().length == 0) {
+			IndexUpgrader upgrader = new IndexUpgrader(directory1);
+			upgrader.upgrade();
+		}
 		LOGGER.debug("upgrade done");
-		
+
 		return luceneVersion;
 	}
 }
