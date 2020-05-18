@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author marx
  */
-public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<String>{
+public class ClusterAnalyticsDb implements AnalyticsDB, ClusterMessageAdapter<String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusterAnalyticsDb.class);
 
