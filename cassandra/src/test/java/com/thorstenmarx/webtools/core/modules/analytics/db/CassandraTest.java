@@ -76,7 +76,7 @@ public class CassandraTest {
 	/**
 	 * Test of open method, of class AnalyticsDb.
 	 */
-	@Test(enabled = false)
+	@Test(enabled = true)
 	public void testAnalyticsDb() throws Exception {
 
 		System.out.println("running analytics db test");
