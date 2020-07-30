@@ -34,6 +34,7 @@ import com.thorstenmarx.webtools.api.analytics.query.Query;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -263,6 +264,36 @@ public class AnalyticsDbTest {
 
 		Map<String, Object> result = future.get();
 		assertThat((int) result.get("count")).isEqualTo(1);
+	}
+	
+	@Test()
+	public void test_exits() throws Exception {
+
+		System.out.println("running testQuery");
+
+		long timestamp = System.currentTimeMillis();
+
+		Map<String, Object> event = new HashMap<>();
+
+		event.put(Fields._TimeStamp.value(), timestamp);
+		final String uuid = UUID.randomUUID().toString();
+		event.put(Fields._UUID.value(), uuid);
+
+		Map<String, Object> meta = new HashMap<>();
+
+		instance.track(TestHelper.event(event, meta));
+
+		Assertions.assertThat(instance.exists(uuid)).isTrue();
+	}
+	
+	@Test()
+	public void test_exits_not() throws Exception {
+
+		System.out.println("test_exits_not");
+
+		final String uuid = UUID.randomUUID().toString();
+
+		Assertions.assertThat(instance.exists(uuid)).isFalse();
 	}
 
 	@Test()

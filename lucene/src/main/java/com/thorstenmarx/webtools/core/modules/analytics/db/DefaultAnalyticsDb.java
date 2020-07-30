@@ -139,7 +139,10 @@ public class DefaultAnalyticsDb extends AbstractAnalyticsDb<LuceneIndex> {
 		if (uuid == null) {
 			return false;
 		}
-		Query query = Query.builder().term(Fields._UUID.value(), uuid).build();
+		Query query = Query.builder().term(Fields._UUID.value(), uuid)
+				.start(0)
+				.end(Long.MAX_VALUE)
+				.build();
 		CompletableFuture<List<ShardDocument>> future = CompletableFuture.supplyAsync(() -> {
 			return index.search(query);
 		});
