@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.function.Consumer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.IndexReader;
@@ -78,10 +79,10 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	protected final String name;
 	private final Configuration configuration;
-	protected String uuid;
+	protected String shard_uuid;
 
 	protected Version luceneVersion = Version.LATEST;
-	
+
 	private ShardVersion shardVersion = ShardVersion.LATEST;
 
 	private File shardDir;
@@ -155,8 +156,8 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		saveConfiguration();
 		LOGGER.debug("configuration saved");
 	}
-	
-	private void updateToLatestShardVersion () {
+
+	private void updateToLatestShardVersion() {
 		String indexDir = configuration.directory;
 		if (!indexDir.endsWith("/")) {
 			indexDir += "/";
@@ -170,7 +171,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 	}
 
 	public void open() throws IOException {
-		
+
 		String indexDir = configuration.directory;
 		if (!indexDir.endsWith("/")) {
 			indexDir += "/";
@@ -179,19 +180,17 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 		shardDir = new File(indexDir + name);
 
-		
-
 		File shardPropertyFile = new File(shardDir, "shard.properties");
 		if (shardPropertyFile.exists()) {
 			shardConfiguration.load(new FileReader(shardPropertyFile));
 		}
-		
+
 		update(null);
-		
-		uuid = shardConfiguration.getProperty("shard.uuid", UUID.randomUUID().toString());
+
+		shard_uuid = shardConfiguration.getProperty("shard.uuid", UUID.randomUUID().toString());
 
 		indexAccess = new ReadWriteIndexAccess(Paths.get(shardDir.toURI()));
-		
+
 		luceneVersion = new IndexUpdate().update(indexAccess.directory(), shardConfiguration);
 
 		indexAccess.open();
@@ -215,7 +214,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		shardConfiguration.put("shard.maxtime", String.valueOf(timeTo));
 		shardConfiguration.put("shard.mintime", String.valueOf(timeFrom));
 		shardConfiguration.put("shard.name", name);
-		shardConfiguration.put("shard.uuid", uuid);
+		shardConfiguration.put("shard.uuid", shard_uuid);
 		shardConfiguration.put("lucene.version", luceneVersion.toString());
 		shardConfiguration.put("shard.version", shardVersion.toString());
 		shardConfiguration.store(new FileWriter(shardPropertyFile), "shard configuration");
@@ -300,6 +299,17 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 	}
 
 	private List<ShardDocument> internal_search(final Query query, IndexSearcher indexSearcher) throws IOException {
+		final List<ShardDocument> result = new ArrayList<>();
+		
+		lucene_search(query, indexSearcher, (source) -> {
+			final JSONObject sourceJson = JSONObject.parseObject(source);
+			result.add(new ShardDocument(name, sourceJson));
+		});
+
+		return Collections.unmodifiableList(result);
+	}
+	
+	private void lucene_search(final Query query, final IndexSearcher indexSearcher, Consumer<String> consumer) throws IOException {
 
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 
@@ -326,17 +336,15 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		indexSearcher.search(booleanQuery, collector);
 
 		BitSet hits = collector.hits();
-		final List<ShardDocument> result = new ArrayList<>();
-
 		hits.stream().forEach((i) -> {
 			try {
 				Document doc = indexSearcher.doc(i);
-				final byte[] sourceBytes = doc.getBinaryValue(Fields.SOURCE.value()).bytes;
-				final String source = Snappy.uncompressString(sourceBytes);
-//				final String uuid = doc.get(Fields._UUID.value());
-//				final String source = contentStore.get(uuid);
-				final JSONObject sourceJson = JSONObject.parseObject(source);
-				result.add(new ShardDocument(name, sourceJson));
+//				final byte[] sourceBytes = doc.getBinaryValue(Fields.SOURCE.value()).bytes;
+//				final String source = Snappy.uncompressString(sourceBytes);
+				final String uuid = doc.get(Fields._UUID.value());
+				final String source = contentStore.get(uuid);
+				
+				consumer.accept(source);
 			} catch (IOException ex) {
 				LOGGER.error("", ex);
 			}
@@ -344,7 +352,29 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 		// for realtime search add transaction log data
 		List<ShardDocument> translogDocs = commitLog.getSearchable().search(query);
-		result.addAll(translogDocs);
+		
+		translogDocs.forEach((doc) -> {
+			consumer.accept(doc.document.toJSONString());
+		});
+	}
+
+	public List<String> raw_search(final Query query) throws IOException {
+		commitLog.readLock().lock();
+		IndexSearcher indexSearcher = indexAccess.searcherManager().acquire();
+		try {
+			return raw_search(query, indexSearcher);
+		} finally {
+			indexAccess.searcherManager().release(indexSearcher);
+			commitLog.readLock().unlock();
+		}
+	}
+	private List<String> raw_search(final Query query, IndexSearcher indexSearcher) throws IOException {
+
+		final List<String> result = new ArrayList<>();
+		
+		lucene_search(query, indexSearcher, (source) -> {
+			result.add(source);
+		});
 
 		return Collections.unmodifiableList(result);
 	}

@@ -4,13 +4,13 @@
 	<parent>
 		<groupId>com.thorstenmarx.webtools.core.modules.analytics</groupId>
 		<artifactId>analytics-storage</artifactId>
-		<version>1.10.0</version>
+		<version>1.11.0</version>
 	</parent>
 	<artifactId>analytics-storage-lucene</artifactId>
 	<packaging>jar</packaging>
 	
 	<properties>
-		<lucene.version>8.5.2</lucene.version>
+		<lucene.version>8.6.0</lucene.version>
 		<leveldb.version>1.2</leveldb.version>
 	</properties>
 

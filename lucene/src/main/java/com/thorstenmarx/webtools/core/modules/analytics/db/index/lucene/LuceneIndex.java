@@ -245,6 +245,21 @@ public class LuceneIndex implements Index, AutoCloseable {
 
 		return Collections.unmodifiableList(result);
 	}
+	
+	public List<String> raw_search(Query query) {
+
+		List<String> result = new java.util.concurrent.CopyOnWriteArrayList<>();
+		shards.stream().filter((shard) -> (shard.hasData(query.start(), query.end()))).forEach((shard) -> {
+			try {
+				final List<String> shardResult = shard.raw_search(query);
+				result.addAll(shardResult);
+			} catch (IOException ex) {
+				LOGGER.error("", ex);
+			}
+		});
+
+		return Collections.unmodifiableList(result);
+	}
 
 	@Override
 	public long size() {

@@ -63,7 +63,7 @@ public class DocumentBuilder {
 		flatJsonObject(null, json, document);
 
 
-		document.add(new StoredField(Fields.SOURCE.value(), Snappy.compress(json.toJSONString())));
+		//document.add(new StoredField(Fields.SOURCE.value(), Snappy.compress(json.toJSONString())));
 
 
 		return document;

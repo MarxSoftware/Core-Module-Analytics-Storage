@@ -31,6 +31,7 @@ import com.thorstenmarx.webtools.api.analytics.query.ShardedQuery;
 import com.thorstenmarx.webtools.api.execution.Executor;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.AsyncShardQuery;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.LuceneIndex;
+import com.thorstenmarx.webtools.core.modules.analytics.db.raw.RawAggregator;
 import com.thorstenmarx.webtools.core.modules.analytics.pipeline.DBUpdateStage;
 import com.thorstenmarx.webtools.core.modules.analytics.pipeline.EventContext;
 import com.thorstenmarx.webtools.core.modules.analytics.util.pipeline.Pipeline;
@@ -167,7 +168,24 @@ public class DefaultAnalyticsDb extends AbstractAnalyticsDb<LuceneIndex> {
 		});
 
 		return future2;
+	}
+	
+	public <T> CompletableFuture<T> raw_query(final Query query, final RawAggregator<T> aggregator) {
+		CompletableFuture<List<String>> future = CompletableFuture.supplyAsync(() -> {
+			return index.raw_search(query);
+		});
 
+		CompletableFuture<T> future2 = future.thenApplyAsync((documents) -> {
+			try {
+				aggregator.documents(documents);
+				return aggregator.call();
+			} catch (Exception ex) {
+				LOGGER.error("", ex);
+			}
+			return null;
+		});
+
+		return future2;
 	}
 
 	@Override
