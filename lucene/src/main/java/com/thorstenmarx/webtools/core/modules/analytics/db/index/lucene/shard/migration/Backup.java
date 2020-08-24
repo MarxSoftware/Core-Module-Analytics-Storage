@@ -46,6 +46,6 @@ public class Backup {
 		
 		backup.backup(
 				Path.of("../../temp/analytics/index/shard_0000000001/index"), 
-				Path.of("../../temp/analytics/index/shard_0000000001/index." + backup.extension());
+				Path.of("../../temp/analytics/index/shard_0000000001/index." + backup.extension()));
 	}
 }
