@@ -47,7 +47,7 @@ import org.apache.lucene.store.Directory;
  *
  * @author marx
  */
-public interface IndexAccess {
+public interface IndexAccess extends AutoCloseable {
 
 	void commit() throws IOException;
 
@@ -59,6 +59,7 @@ public interface IndexAccess {
 	
 	void open() throws IOException;
 	
+	@Override
 	void close() throws IOException;
 	
 }

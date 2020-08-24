@@ -33,11 +33,14 @@ import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.Shard;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.ShardVersion;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.commitlog.LevelDBCommitLog;
 import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.CommitLog;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.shard.migration.Backup;
+import com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.shard.migration.ShardVersion1Migration;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -47,6 +50,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.IndexReader;
@@ -63,7 +67,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xerial.snappy.Snappy;
 
 /**
  * A Shard is a single lucene index with a giffen start and end time.
@@ -83,7 +86,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	protected Version luceneVersion = Version.LATEST;
 
-	private ShardVersion shardVersion = ShardVersion.LATEST;
+	protected ShardVersion shardVersion = ShardVersion.LATEST;
 
 	private File shardDir;
 
@@ -109,7 +112,15 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		documentBuilder = new DocumentBuilder();
 	}
 
-	private void update(final Directory directory) throws IOException {
+	public ContentStore getContentStore() {
+		return contentStore;
+	}
+
+	public IndexAccess getIndexAccess() {
+		return indexAccess;
+	}
+
+	private void update() throws IOException {
 		// check if update is needed
 		if (!shardConfiguration.containsKey("shard.uuid")) {
 			return;
@@ -119,27 +130,29 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		if (shardVersionProperty == null) {
 			// no shard version means the shard data is still in wrong directory
 			updateToLatestShardVersion();
+		} else {
+			ShardMigration shardMigration = new ShardMigration();
+			if (shardMigration.migration_needed(this)) {
+				LOGGER.debug("index migration necessery");
+				final Migrator migrator = shardMigration.migrator(shardVersion);
+				Backup backup = new Backup();
+				backup.backup(Paths.get(new File(shardDir, "index").toURI()), Paths.get(shardDir.getAbsolutePath() + "/index.backup_" + backup.extension()));
+				try (IndexAccess updateAccess = new ReadWriteIndexAccess(Paths.get(shardDir.toURI()), true);) {
+					updateAccess.open();
+					migrator.migrate(this, (doc) -> {
+						try {
+							add_index_document(updateAccess, doc);
+						} catch (IOException ex) {
+							LOGGER.error("error migrating index", ex);
+							throw new RuntimeException(ex);
+						}
+					});
+					shardVersion = migrator.shardVersion();
+					luceneVersion = migrator.luceneVersion();
+				}
+			}
 		}
 
-//		String luceneVersionProperty = shardConfiguration.getProperty("lucene.version", null);
-//		if (luceneVersionProperty == null) {
-//			// thats the case if you update a old version withour index upgrade functionality
-//			LOGGER.debug("very old index format found, try to upgrade to latest version");
-//			updateToLatestIndexVersion(directory);
-//		} else {
-//			try {
-//				Version version = Version.parse(luceneVersionProperty);
-//				if (!Version.LATEST.equals(version)) {
-//					LOGGER.debug("you are using an old index format, try to update your index");
-//					updateToLatestIndexVersion(directory);
-//				} else {
-//					LOGGER.debug("your index is uptodate, not upgraded needed");
-//				}
-//			} catch (ParseException ex) {
-//				LOGGER.error("", ex);
-//				throw new IllegalStateException("could not parse index version", ex);
-//			}
-//		}
 	}
 
 	@Override
@@ -147,16 +160,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		return name;
 	}
 
-	private void updateToLatestIndexVersion(final Directory directory) throws IOException {
-		LOGGER.debug("upgrade to latest index version");
-		luceneVersion = Version.LATEST;
-		IndexUpgrader upgrader = new IndexUpgrader(directory);
-		upgrader.upgrade();
-		LOGGER.debug("upgrade done");
-		saveConfiguration();
-		LOGGER.debug("configuration saved");
-	}
-
+	@Deprecated()
 	private void updateToLatestShardVersion() {
 		String indexDir = configuration.directory;
 		if (!indexDir.endsWith("/")) {
@@ -183,9 +187,23 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 		File shardPropertyFile = new File(shardDir, "shard.properties");
 		if (shardPropertyFile.exists()) {
 			shardConfiguration.load(new FileReader(shardPropertyFile));
+
+			try {
+				shardVersion = ShardVersion.parse(shardConfiguration.getProperty("shard.version"));
+				luceneVersion = Version.parse(shardConfiguration.getProperty("lucene.version"));
+			} catch (ParseException pe) {
+				LOGGER.error("", pe);
+				throw new RuntimeException(pe);
+			}
 		}
 
-		update(null);
+		this.commitLog = new LevelDBCommitLog(configuration, this, adb.getExecutor());
+		commitLog.open();
+
+		contentStore = new ContentStore(shardDir);
+		contentStore.open();
+
+		update();
 
 		shard_uuid = shardConfiguration.getProperty("shard.uuid", UUID.randomUUID().toString());
 
@@ -197,12 +215,6 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 		this.timeTo = getMaxTimestamp();
 		this.timeFrom = getMinTimestamp();
-
-		this.commitLog = new LevelDBCommitLog(configuration, this, adb.getExecutor());
-		commitLog.open();
-
-		contentStore = new ContentStore(shardDir);
-		contentStore.open();
 
 		saveConfiguration();
 	}
@@ -247,14 +259,18 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 	}
 
 	protected void add_internal(final JSONObject json) throws IOException {
-		final Document doc = documentBuilder.build(json);
-		indexAccess.indexWriter().addDocument(doc);
+		add_index_document(indexAccess, json);
 
 		final String uuid = json.getString(Fields._UUID.value());
 		final String source = json.toJSONString();
 		contentStore.put(uuid, source);
 
-		long timestamp = doc.getField(Fields._TimeStamp.value()).numericValue().longValue();
+	}
+
+	private void add_index_document(final IndexAccess indexer, final JSONObject json) throws IOException {
+		final Document document = documentBuilder.build(json);
+		indexer.indexWriter().addDocument(document);
+		long timestamp = document.getField(Fields._TimeStamp.value()).numericValue().longValue();
 		if (timestamp > timeTo || timeTo == -1) {
 			timeTo = timestamp;
 		}
@@ -300,7 +316,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 	private List<ShardDocument> internal_search(final Query query, IndexSearcher indexSearcher) throws IOException {
 		final List<ShardDocument> result = new ArrayList<>();
-		
+
 		lucene_search(query, indexSearcher, (source) -> {
 			final JSONObject sourceJson = JSONObject.parseObject(source);
 			result.add(new ShardDocument(name, sourceJson));
@@ -308,7 +324,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 		return Collections.unmodifiableList(result);
 	}
-	
+
 	private void lucene_search(final Query query, final IndexSearcher indexSearcher, Consumer<String> consumer) throws IOException {
 
 		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
@@ -343,7 +359,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 //				final String source = Snappy.uncompressString(sourceBytes);
 				final String uuid = doc.get(Fields._UUID.value());
 				final String source = contentStore.get(uuid);
-				
+
 				consumer.accept(source);
 			} catch (IOException ex) {
 				LOGGER.error("", ex);
@@ -352,7 +368,7 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 
 		// for realtime search add transaction log data
 		List<ShardDocument> translogDocs = commitLog.getSearchable().search(query);
-		
+
 		translogDocs.forEach((doc) -> {
 			consumer.accept(doc.document.toJSONString());
 		});
@@ -368,10 +384,11 @@ public class LuceneShard implements Searchable, Comparable<LuceneShard>, Shard {
 			commitLog.readLock().unlock();
 		}
 	}
+
 	private List<String> raw_search(final Query query, IndexSearcher indexSearcher) throws IOException {
 
 		final List<String> result = new ArrayList<>();
-		
+
 		lucene_search(query, indexSearcher, (source) -> {
 			result.add(source);
 		});

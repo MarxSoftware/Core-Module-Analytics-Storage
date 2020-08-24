@@ -37,11 +37,13 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene.shard;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-
 import java.io.File;
 import java.io.IOException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
@@ -54,11 +56,11 @@ public class ContentStore implements AutoCloseable {
 	private DB db;
 	private final File parent;
 
-	protected ContentStore (final File parent) {
+	protected ContentStore(final File parent) {
 		this.parent = parent;
 	}
-	
-	protected void open () throws IOException {
+
+	protected void open() throws IOException {
 		Options options = new Options();
 		options.createIfMissing(true);
 		options.compressionType(CompressionType.SNAPPY);
@@ -69,11 +71,22 @@ public class ContentStore implements AutoCloseable {
 	public void close() throws IOException {
 		db.close();
 	}
-	
-	public void put (final String uuid, final String source) {
+
+	public void put(final String uuid, final String source) {
 		db.put(bytes(uuid), bytes(source));
 	}
-	public String get (final String uuid) {
+
+	public String get(final String uuid) {
 		return asString(db.get(bytes(uuid)));
+	}
+
+	public void forEach(final BiConsumer<String, String> consumer) {
+		try (DBIterator iterator = db.iterator()) {
+			for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+				String key = asString(iterator.peekNext().getKey());
+				String value = asString(iterator.peekNext().getValue());
+				consumer.accept(key, value);
+			}
+		}
 	}
 }

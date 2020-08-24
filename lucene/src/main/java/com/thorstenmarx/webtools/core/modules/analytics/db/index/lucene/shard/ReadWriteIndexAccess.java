@@ -42,7 +42,7 @@ import org.apache.lucene.store.NRTCachingDirectory;
  */
 public class ReadWriteIndexAccess implements IndexAccess {
 
-	private Directory directory;
+	private final Directory directory;
 	private IndexWriter writer = null;
 
 	private SearcherManager nrt_manager;
@@ -52,9 +52,17 @@ public class ReadWriteIndexAccess implements IndexAccess {
 	
 	private final Lock commitLock = new ReentrantLock();
 
-	public ReadWriteIndexAccess(final Path path) throws IOException {
+	IndexWriterConfig.OpenMode openMode = IndexWriterConfig.OpenMode.CREATE_OR_APPEND;
+	
+	public ReadWriteIndexAccess(final Path path, final boolean create) throws IOException {
 		this.path = path.resolve("index");
 		this.directory = FSDirectory.open(this.path);
+		if (create) {
+			openMode = IndexWriterConfig.OpenMode.CREATE;
+		}
+	}
+	public ReadWriteIndexAccess (final Path path) throws IOException {
+		this(path, false);
 	}
 
 	@Override

@@ -39,14 +39,15 @@ package com.thorstenmarx.webtools.core.modules.analytics.db.index.lucene;
  */
 
 import java.text.ParseException;
-import java.util.Locale;
 
 public final class ShardVersion {
 
 	
 	public static final ShardVersion SHARD_1 = new ShardVersion(1);
+	
+	public static final ShardVersion SHARD_2 = new ShardVersion(2);
 
-	public static final ShardVersion LATEST = SHARD_1;
+	public static final ShardVersion LATEST = SHARD_2;
 
 	/**
 	 * Parse a version number of the form

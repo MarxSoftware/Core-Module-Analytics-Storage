@@ -79,11 +79,11 @@ public class IndexUpdate {
 		return Version.LATEST;
 	}
 
-	private Version updateToLatestIndexVersion(final Directory directory1) throws IOException {
+	private Version updateToLatestIndexVersion(final Directory directory) throws IOException {
 		LOGGER.debug("upgrade to latest index version");
 		luceneVersion = Version.LATEST;
-		if (directory1.listAll().length == 0) {
-			IndexUpgrader upgrader = new IndexUpgrader(directory1);
+		if (directory.listAll().length == 0) {
+			IndexUpgrader upgrader = new IndexUpgrader(directory);
 			upgrader.upgrade();
 		}
 		LOGGER.debug("upgrade done");
