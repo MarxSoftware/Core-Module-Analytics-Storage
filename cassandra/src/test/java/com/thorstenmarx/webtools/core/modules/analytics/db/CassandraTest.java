@@ -39,16 +39,9 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
  */
 import com.alibaba.fastjson.JSONObject;
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.CqlSessionBuilder;
-import com.datastax.oss.driver.api.core.session.SessionBuilder;
 import com.thorstenmarx.webtools.api.analytics.Fields;
-import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
-import com.thorstenmarx.webtools.api.analytics.query.Query;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.UUID;
-import java.util.Map;
-import java.util.concurrent.Future;
 import net.engio.mbassy.bus.MBassador;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -86,22 +79,25 @@ public class CassandraTest {
 		try (CassandraAnalyticsDb instance = new CassandraAnalyticsDb(config, new MBassador(), session)) {
 			instance.open();
 
-			JSONObject data = new JSONObject();
-
-			long timestamp = System.currentTimeMillis();
-			data.put(Fields._TimeStamp.value(), timestamp);
-			data.put("ua", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0");
-			data.put(Fields._UUID.value(), UUID.randomUUID().toString());
-			data.put("event", "pageview");
-			data.put("site", "atest_site");
-			data.put("version", 1);
-
-			JSONObject meta = new JSONObject();
-			meta.put("ip", "88.153.198.210");
-
 			System.out.println(instance.index().size());
 			long before = System.currentTimeMillis();
-			instance.track(TestHelper.event(data, meta));
+			for (int i = 0; i < 100; i++) {
+				JSONObject data = new JSONObject();
+
+				long timestamp = System.currentTimeMillis();
+				data.put(Fields._TimeStamp.value(), timestamp);
+				data.put("ua", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0");
+				data.put(Fields._UUID.value(), UUID.randomUUID().toString());
+				data.put("event", "pageview");
+				data.put("site", "atest_site");
+				data.put("version", 1);
+
+				JSONObject meta = new JSONObject();
+				meta.put("ip", "88.153.198.210");
+
+				instance.track(TestHelper.event(data, meta));
+			}
+
 			long after = System.currentTimeMillis();
 			System.out.println((after - before) + " ms");
 			System.out.println(instance.index().size());
