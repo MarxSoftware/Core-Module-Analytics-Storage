@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.thorstenmarx.webtools.core.modules.analytics.db;
+package de.marx_software.webtools.core.modules.analytics.db;
 
 /*-
  * #%L
@@ -38,10 +38,10 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
  * #L%
  */
 import com.alibaba.fastjson.JSONObject;
-import com.thorstenmarx.webtools.api.analytics.Fields;
-import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
-import com.thorstenmarx.webtools.api.analytics.query.Query;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.elastic.TestHelper;
+import de.marx_software.webtools.api.analytics.Fields;
+import de.marx_software.webtools.api.analytics.query.Aggregator;
+import de.marx_software.webtools.api.analytics.query.Query;
+import de.marx_software.webtools.core.modules.analytics.db.index.elastic.TestHelper;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;

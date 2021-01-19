@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.thorstenmarx.webtools.core.modules.analytics.db.index.cassandra;
+package de.marx_software.webtools.core.modules.analytics.db.index.cassandra;
 
 /*-
  * #%L
@@ -45,12 +45,12 @@ import com.datastax.oss.driver.api.core.cql.SimpleStatement;
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
 import com.datastax.oss.driver.api.querybuilder.insert.RegularInsert;
 import com.datastax.oss.driver.api.querybuilder.term.Term;
-import com.thorstenmarx.webtools.api.analytics.Fields;
-import com.thorstenmarx.webtools.api.analytics.query.Query;
-import com.thorstenmarx.webtools.api.analytics.query.ShardDocument;
-import com.thorstenmarx.webtools.core.modules.analytics.db.Configuration;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.Index;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.IndexDocument;
+import de.marx_software.webtools.api.analytics.Fields;
+import de.marx_software.webtools.api.analytics.query.Query;
+import de.marx_software.webtools.api.analytics.query.ShardDocument;
+import de.marx_software.webtools.core.modules.analytics.db.Configuration;
+import de.marx_software.webtools.core.modules.analytics.db.index.Index;
+import de.marx_software.webtools.core.modules.analytics.db.index.IndexDocument;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;

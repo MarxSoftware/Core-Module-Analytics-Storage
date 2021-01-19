@@ -1,4 +1,4 @@
-package com.thorstenmarx.webtools.core.modules.analytics.db;
+package de.marx_software.webtools.core.modules.analytics.db;
 
 /*-
  * #%L
@@ -24,17 +24,17 @@ package com.thorstenmarx.webtools.core.modules.analytics.db;
 
 import com.alibaba.fastjson.JSONObject;
 
-import com.thorstenmarx.webtools.api.analytics.Fields;
-import com.thorstenmarx.webtools.api.analytics.query.Aggregator;
-import com.thorstenmarx.webtools.api.analytics.query.LimitProvider;
-import com.thorstenmarx.webtools.api.analytics.query.Query;
-import com.thorstenmarx.webtools.api.analytics.query.ShardDocument;
-import com.thorstenmarx.webtools.api.analytics.query.ShardedQuery;
-import com.thorstenmarx.webtools.core.modules.analytics.db.index.elastic.ElasticIndex;
-import com.thorstenmarx.webtools.core.modules.analytics.pipeline.DBUpdateStage;
-import com.thorstenmarx.webtools.core.modules.analytics.pipeline.EventContext;
-import com.thorstenmarx.webtools.core.modules.analytics.util.pipeline.Pipeline;
-import com.thorstenmarx.webtools.core.modules.analytics.util.pipeline.SequentialPipeline;
+import de.marx_software.webtools.api.analytics.Fields;
+import de.marx_software.webtools.api.analytics.query.Aggregator;
+import de.marx_software.webtools.api.analytics.query.LimitProvider;
+import de.marx_software.webtools.api.analytics.query.Query;
+import de.marx_software.webtools.api.analytics.query.ShardDocument;
+import de.marx_software.webtools.api.analytics.query.ShardedQuery;
+import de.marx_software.webtools.core.modules.analytics.db.index.elastic.ElasticIndex;
+import de.marx_software.webtools.core.modules.analytics.pipeline.DBUpdateStage;
+import de.marx_software.webtools.core.modules.analytics.pipeline.EventContext;
+import de.marx_software.webtools.core.modules.analytics.util.pipeline.Pipeline;
+import de.marx_software.webtools.core.modules.analytics.util.pipeline.SequentialPipeline;
 
 import java.io.IOException;
 import java.util.List;
